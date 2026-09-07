@@ -1,7 +1,7 @@
 .PHONY: help install run test lint docker-build docker-up docker-down docker-logs docker-clean
 
 PYTHON = poetry run python
-APP = backend/main.py
+APP = main.py
 
 help:
 	@echo "Comandos disponíveis:"
@@ -16,16 +16,16 @@ help:
 	@echo "  make docker-clean - remove containers, volumes e imagens"
 
 install:
-	poetry install
+	cd backend && poetry install
 
 run:
-	$(PYTHON) $(APP)
+	cd backend && $(PYTHON) $(APP)
 
 test:
-	poetry run pytest
+	cd backend && poetry run pytest
 
 lint:
-	poetry run black .
+	cd backend && poetry run black .
 
 docker-build:
 	docker compose build
