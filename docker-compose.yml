@@ -1,0 +1,38 @@
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: sd_backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    environment:
+      - DATABASE_URL=postgresql://sd_user:sd_password@db:5432/sd_database
+    depends_on:
+      - db
+    networks:
+      - sd_network
+
+  db:
+    image: postgres:16-alpine
+    container_name: sd_database
+    environment:
+      - POSTGRES_USER=sd_user
+      - POSTGRES_PASSWORD=sd_password
+      - POSTGRES_DB=sd_database
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - sd_network
+
+volumes:
+  postgres_data:
+
+networks:
+  sd_network:
+    driver: bridge
