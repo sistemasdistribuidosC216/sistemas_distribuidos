@@ -9,3 +9,22 @@ Cada prática é desenvolvida em uma branch própria (a partir de `aulas`) e ent
 ## 👤 Autor
 
 Clara de Lima Azevedo — Engenharia de Computação, Inatel
+
+## Como rodar os testes
+
+### Localmente (com Poetry)
+
+```bash
+make test
+```
+
+Ou diretamente:
+
+```bash
+cd backend
+poetry run pytest -v
+```
+
+### CI (GitHub Actions)
+
+Os testes rodam automaticamente em todo push e pull request, via o workflow definido em .github/workflows/ci-backend.yml.
