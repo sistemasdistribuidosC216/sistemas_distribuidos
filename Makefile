@@ -1,43 +1,61 @@
-.PHONY: help install run test lint docker-build docker-up docker-down docker-logs docker-clean
-
-PYTHON = poetry run python
-APP = main.py
+.PHONY: help install run format lint test up up-build down restart logs migrate docker-build docker-up docker-down docker-logs docker-clean
 
 help:
 	@echo "Comandos disponíveis:"
-	@echo "  make install      - instala as dependências do projeto"
-	@echo "  make run          - roda a aplicação"
-	@echo "  make test         - roda os testes"
-	@echo "  make lint         - roda o linter/formatador"
-	@echo "  make docker-build - constrói as imagens Docker"
-	@echo "  make docker-up    - sobe os containers em background"
-	@echo "  make docker-down  - para e remove os containers"
-	@echo "  make docker-logs  - mostra os logs dos containers em tempo real"
-	@echo "  make docker-clean - remove containers, volumes e imagens"
+	@echo "  make install    - instala as dependências"
+	@echo "  make run        - roda a API localmente"
+	@echo "  make format     - formata o código (ruff --fix + black)"
+	@echo "  make lint       - verifica o código (ruff + black --check)"
+	@echo "  make test       - sobe o PostgreSQL e roda os testes"
+	@echo "  make up         - sobe API + PostgreSQL"
+	@echo "  make up-build   - reconstrói as imagens e sobe API + PostgreSQL"
+	@echo "  make down       - para os containers (mantém os dados)"
+	@echo "  make restart    - reinicia só a API"
+	@echo "  make logs       - mostra os logs"
+	@echo "  make migrate    - aplica as migrations"
 
 install:
 	cd backend && poetry install
 
 run:
-	cd backend && $(PYTHON) $(APP)
+	cd backend && poetry run uvicorn main:app --reload
 
-test:
-	cd backend && poetry run pytest
+format:
+	cd backend && poetry run ruff check --fix . && poetry run black .
 
 lint:
-	cd backend && poetry run black .
+	cd backend && poetry run ruff check . && poetry run black --check .
+
+test:
+	docker compose up -d --wait db
+	cd backend && poetry run pytest -v
+
+up:
+	docker compose up -d
+
+up-build:
+	docker compose up -d --build
+
+down:
+	docker compose down
+
+restart:
+	docker compose restart backend
+
+logs:
+	docker compose logs -f
+
+migrate:
+	docker compose exec backend alembic upgrade head
 
 docker-build:
 	docker compose build
 
-docker-up:
-	docker compose up -d
+docker-up: up
 
-docker-down:
-	docker compose down
+docker-down: down
 
-docker-logs:
-	docker compose logs -f
+docker-logs: logs
 
 docker-clean:
 	docker compose down -v --rmi all

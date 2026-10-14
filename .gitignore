@@ -21,3 +21,5 @@ venv/
 # Logs
 *.log__pycache__/
 backend/__pycache__/
+.ruff_cache/
+.pytest_cache/
