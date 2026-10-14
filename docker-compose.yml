@@ -1,4 +1,3 @@
-
 services:
   backend:
     build:
@@ -10,9 +9,10 @@ services:
     volumes:
       - ./backend:/app
     environment:
-      - DATABASE_URL=postgresql://sd_user:sd_password@db:5432/sd_database
+      - DATABASE_URL=postgresql+psycopg://sd_user:sd_password@db:5432/sd_database
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     networks:
       - sd_network
 
@@ -27,6 +27,11 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sd_user -d sd_database"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
     networks:
       - sd_network
 
