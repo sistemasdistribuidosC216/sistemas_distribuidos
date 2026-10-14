@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-from app.routers import items
+from app.api import items
 
 app = FastAPI(title="Sistemas Distribuidos - Backend")
 
