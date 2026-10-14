@@ -12,6 +12,24 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: sd_user
+          POSTGRES_PASSWORD: sd_password
+          POSTGRES_DB: sd_database
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U sd_user -d sd_database"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql+psycopg://sd_user:sd_password@localhost:5432/sd_database
+
     defaults:
       run:
         working-directory: backend
@@ -30,6 +48,14 @@ jobs:
 
       - name: Instalar dependencias
         run: poetry install --no-interaction --no-ansi --no-root
+
+      - name: Lint
+        run: |
+          poetry run ruff check .
+          poetry run black --check .
+
+      - name: Aplicar migrations
+        run: poetry run alembic upgrade head
 
       - name: Rodar testes com Pytest
         run: poetry run pytest -v
