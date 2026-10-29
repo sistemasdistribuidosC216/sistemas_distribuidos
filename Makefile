@@ -1,4 +1,5 @@
-.PHONY: help install run format lint test up up-build down restart logs migrate docker-build docker-up docker-down docker-logs docker-clean
+.PHONY: help install run format lint test up up-build down restart logs migrate docker-build docker-up docker-down docker-logs docker-clean \
+	frontend-install frontend-dev frontend-lint frontend-format frontend-check frontend-test frontend-test-e2e frontend-build check-all
 
 help:
 	@echo "Comandos disponíveis:"
@@ -13,6 +14,17 @@ help:
 	@echo "  make restart    - reinicia só a API"
 	@echo "  make logs       - mostra os logs"
 	@echo "  make migrate    - aplica as migrations"
+	@echo ""
+	@echo "Frontend:"
+	@echo "  make frontend-install   - instala as dependências (npm ci)"
+	@echo "  make frontend-dev       - servidor de desenvolvimento (Vite)"
+	@echo "  make frontend-lint      - lint com Biome"
+	@echo "  make frontend-format    - formata o código com Biome"
+	@echo "  make frontend-check     - lint + formatação sem alterar arquivos"
+	@echo "  make frontend-test      - testes unitários e de integração (Vitest)"
+	@echo "  make frontend-test-e2e  - testes E2E (Playwright)"
+	@echo "  make frontend-build     - build de produção"
+	@echo "  make check-all          - backend (Ruff + Pytest) + frontend (Biome, Vitest, build, E2E)"
 
 install:
 	cd backend && poetry install
@@ -59,3 +71,33 @@ docker-logs: logs
 
 docker-clean:
 	docker compose down -v --rmi all
+
+
+# ---------- Frontend ----------
+
+frontend-install:
+	npm --prefix frontend ci
+
+frontend-dev:
+	npm --prefix frontend run dev
+
+frontend-lint:
+	npm --prefix frontend run lint
+
+frontend-format:
+	npm --prefix frontend run format
+
+frontend-check:
+	npm --prefix frontend run lint
+	npm --prefix frontend run format:check
+
+frontend-test:
+	npm --prefix frontend run test
+
+frontend-test-e2e:
+	npm --prefix frontend run test:e2e
+
+frontend-build:
+	npm --prefix frontend run build
+
+check-all: lint test frontend-check frontend-test frontend-build frontend-test-e2e
