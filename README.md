@@ -33,3 +33,17 @@ poetry run pytest -v
 ### CI (GitHub Actions)
 
 Os testes rodam automaticamente em todo push e pull request, via o workflow definido em .github/workflows/ci-backend.yml.
+
+## Frontend
+
+Gerenciador de itens (nome e descrição) em React + Vite + Tailwind CSS, com estado local (sem chamadas ao backend nesta prática).
+
+```bash
+make frontend-install   # npm ci
+make frontend-dev       # http://localhost:5173
+make frontend-check     # Biome (lint + formatação)
+make frontend-test      # Vitest (unitários + integração)
+make frontend-test-e2e  # Playwright (rode antes: cd frontend && npx playwright install chromium)
+```
+
+A CI do frontend roda em `.github/workflows/ci-frontend.yml` sempre que um PR altera `frontend/`.
