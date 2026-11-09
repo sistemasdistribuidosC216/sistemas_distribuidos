@@ -1,23 +1,42 @@
 import { expect, test } from "@playwright/test";
 
-test("carrega a interface com a lista vazia", async ({ page }) => {
-  await page.goto("/");
+function uniqueName(prefix) {
+  return `${prefix} ${Date.now()}`;
+}
 
-  await expect(
-    page.getByRole("heading", { name: "Gerenciador de Itens" }),
-  ).toBeVisible();
-  await expect(page.getByText("Nenhum item cadastrado.")).toBeVisible();
+async function addItem(page, name) {
+  await page.getByLabel("Nome").fill(name);
+  await page.getByRole("button", { name: "Adicionar" }).click();
+}
+
+test("cadastra um item e ele persiste após recarregar a página", async ({
+  page,
+}) => {
+  const name = uniqueName("Notebook");
+  await page.goto("/");
+  await addItem(page, name);
+
+  const item = page.getByRole("listitem").filter({ hasText: name });
+  await expect(item).toBeVisible();
+
+  await page.reload();
+  await expect(item).toBeVisible(); // veio do PostgreSQL
 });
 
-test("cadastra um item e o exibe na listagem", async ({ page }) => {
+test("mostra erro ao cadastrar um nome repetido", async ({ page }) => {
+  const name = uniqueName("Mouse");
   await page.goto("/");
+  await addItem(page, name);
+  await expect(
+    page.getByRole("listitem").filter({ hasText: name }),
+  ).toBeVisible();
 
-  await page.getByLabel("Nome").fill("Notebook");
-  await page.getByLabel("Descrição").fill("14 polegadas");
-  await page.getByRole("button", { name: "Adicionar" }).click();
+  await addItem(page, name);
 
-  await expect(page.getByRole("listitem")).toContainText("Notebook");
-  await expect(page.getByText("Nenhum item cadastrado.")).toBeHidden();
+  await expect(page.getByRole("alert")).toHaveText(
+    "Já existe um item com esse nome",
+  );
+  await expect(page.getByLabel("Nome")).toHaveValue(name);
 });
 
 test("mostra erro ao tentar cadastrar com nome vazio", async ({ page }) => {
@@ -26,5 +45,4 @@ test("mostra erro ao tentar cadastrar com nome vazio", async ({ page }) => {
   await page.getByRole("button", { name: "Adicionar" }).click();
 
   await expect(page.getByRole("alert")).toHaveText("O nome é obrigatório.");
-  await expect(page.getByRole("listitem")).toHaveCount(0);
 });

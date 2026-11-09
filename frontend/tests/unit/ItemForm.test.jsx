@@ -3,6 +3,24 @@ import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { ItemForm } from "../../src/components/ItemForm";
 
+  it("mostra o erro da API e mantém o que foi digitado", async () => {
+    const user = userEvent.setup();
+    const onAdd = vi
+      .fn()
+      .mockRejectedValue(new Error("Já existe um item com esse nome"));
+    render(<ItemForm onAdd={onAdd} />);
+
+    await user.type(screen.getByLabelText("Nome"), "Notebook");
+    await user.click(screen.getByRole("button", { name: "Adicionar" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Já existe um item com esse nome",
+    );
+    expect(screen.getByLabelText("Nome")).toHaveValue("Notebook");
+    expect(screen.getByRole("button", { name: "Adicionar" })).toBeEnabled();
+  });
+
+
 describe("ItemForm", () => {
   it("chama onAdd com os valores e limpa os campos", async () => {
     const user = userEvent.setup();
