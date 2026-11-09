@@ -1,4 +1,4 @@
-.PHONY: help install run format lint test up up-build down restart logs migrate docker-build docker-up docker-down docker-logs docker-clean \
+.PHONY: help install run format lint test up up-build down ps restart logs migrate db-upgrade db-current e2e docker-build docker-up docker-down docker-logs docker-clean \
 	frontend-install frontend-dev frontend-lint frontend-format frontend-check frontend-test frontend-test-e2e frontend-build check-all
 
 help:
@@ -8,12 +8,14 @@ help:
 	@echo "  make format     - formata o código (ruff --fix + black)"
 	@echo "  make lint       - verifica o código (ruff + black --check)"
 	@echo "  make test       - sobe o PostgreSQL e roda os testes"
-	@echo "  make up         - sobe API + PostgreSQL"
-	@echo "  make up-build   - reconstrói as imagens e sobe API + PostgreSQL"
+	@echo "  make up         - sobe db + api + frontend"
+	@echo "  make up-build   - reconstrói as imagens e sobe db + api + frontend"
 	@echo "  make down       - para os containers (mantém os dados)"
+	@echo "  make ps         - mostra o estado dos containers"
 	@echo "  make restart    - reinicia só a API"
 	@echo "  make logs       - mostra os logs"
-	@echo "  make migrate    - aplica as migrations"
+	@echo "  make db-upgrade - aplica as migrations"
+	@echo "  make db-current - mostra a migration atual"
 	@echo ""
 	@echo "Frontend:"
 	@echo "  make frontend-install   - instala as dependências (npm ci)"
@@ -22,7 +24,8 @@ help:
 	@echo "  make frontend-format    - formata o código com Biome"
 	@echo "  make frontend-check     - lint + formatação sem alterar arquivos"
 	@echo "  make frontend-test      - testes unitários e de integração (Vitest)"
-	@echo "  make frontend-test-e2e  - testes E2E (Playwright)"
+	@echo "  make frontend-test-e2e  - Playwright contra uma stack já no ar"
+	@echo "  make e2e                - E2E full-stack em stack isolada"
 	@echo "  make frontend-build     - build de produção"
 	@echo "  make check-all          - backend (Ruff + Pytest) + frontend (Biome, Vitest, build, E2E)"
 
@@ -51,14 +54,22 @@ up-build:
 down:
 	docker compose down
 
+ps:
+	docker compose ps
+
 restart:
-	docker compose restart backend
+	docker compose restart api
 
 logs:
 	docker compose logs -f
 
-migrate:
-	docker compose exec backend alembic upgrade head
+db-upgrade:
+	docker compose exec -T api alembic upgrade head
+
+db-current:
+	docker compose exec -T api alembic current
+
+migrate: db-upgrade
 
 docker-build:
 	docker compose build
@@ -100,4 +111,19 @@ frontend-test-e2e:
 frontend-build:
 	npm --prefix frontend run build
 
-check-all: lint test frontend-check frontend-test frontend-build frontend-test-e2e
+# ---------- E2E full-stack (stack separada da de desenvolvimento) ----------
+
+E2E_COMPOSE = API_PORT=8001 FRONTEND_PORT=5174 DB_PORT=5433 \
+	VITE_API_URL=http://localhost:8001 \
+	CORS_ORIGINS=http://localhost:5174,http://127.0.0.1:5174 \
+	docker compose -p lab-e2e
+
+e2e:
+	$(E2E_COMPOSE) up -d --build --wait && \
+	$(E2E_COMPOSE) exec -T api alembic upgrade head && \
+	E2E_BASE_URL=http://localhost:5174 npm --prefix frontend run test:e2e; \
+	status=$$?; \
+	$(E2E_COMPOSE) down -v; \
+	exit $$status
+
+check-all: lint test frontend-check frontend-test frontend-build e2e
