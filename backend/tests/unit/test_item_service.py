@@ -2,7 +2,7 @@ import pytest
 
 from app.models.item import ItemModel
 from app.schemas.item import ItemCreate, ItemUpdate
-from app.services.item_service import ItemService
+from app.services.item_service import DuplicateItemNameError, ItemService
 
 
 class FakeItemRepository:
@@ -18,6 +18,9 @@ class FakeItemRepository:
 
     def get_by_id(self, item_id):
         return self.items.get(item_id)
+
+    def get_by_name(self, name):
+        return next((i for i in self.items.values() if i.name == name), None)
 
     def list(self):
         return list(self.items.values())
@@ -37,9 +40,15 @@ def service():
 
 
 def test_create_item(service):
-    item = service.create_item(ItemCreate(name="Caneta", price=2.5))
+    item = service.create_item(ItemCreate(name="Caneta"))
     assert item.id == 1
     assert item.name == "Caneta"
+
+
+def test_create_item_duplicate_name(service):
+    service.create_item(ItemCreate(name="Caneta"))
+    with pytest.raises(DuplicateItemNameError):
+        service.create_item(ItemCreate(name="Caneta"))
 
 
 def test_get_item_not_found(service):
@@ -47,18 +56,18 @@ def test_get_item_not_found(service):
 
 
 def test_update_item_partial(service):
-    item = service.create_item(ItemCreate(name="Caderno", price=10.0))
-    updated = service.update_item(item.id, ItemUpdate(price=12.0))
-    assert updated.price == 12.0
+    item = service.create_item(ItemCreate(name="Caderno"))
+    updated = service.update_item(item.id, ItemUpdate(description="Capa dura"))
+    assert updated.description == "Capa dura"
     assert updated.name == "Caderno"
 
 
 def test_update_item_not_found(service):
-    assert service.update_item(999, ItemUpdate(price=1.0)) is None
+    assert service.update_item(999, ItemUpdate(description="x")) is None
 
 
 def test_delete_item(service):
-    item = service.create_item(ItemCreate(name="Lapis", price=1.0))
+    item = service.create_item(ItemCreate(name="Lapis"))
     assert service.delete_item(item.id) is True
     assert service.get_item(item.id) is None
 

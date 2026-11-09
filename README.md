@@ -36,14 +36,14 @@ Os testes rodam automaticamente em todo push e pull request, via o workflow defi
 
 ## Frontend
 
-Gerenciador de itens (nome e descrição) em React + Vite + Tailwind CSS, com estado local (sem chamadas ao backend nesta prática).
+Gerenciador de itens (nome e descrição) em React + Vite + Tailwind CSS, que consome a API FastAPI e persiste os dados no PostgreSQL.
 
 ```bash
 make frontend-install   # npm ci
 make frontend-dev       # http://localhost:5173
 make frontend-check     # Biome (lint + formatação)
 make frontend-test      # Vitest (unitários + integração)
-make frontend-test-e2e  # Playwright (rode antes: cd frontend && npx playwright install chromium)
+make e2e                # E2E full-stack em stack isolada (rode antes: cd frontend && npx playwright install chromium)
 ```
 
-A CI do frontend roda em `.github/workflows/ci-frontend.yml` sempre que um PR altera `frontend/`.
+A CI do frontend roda em `.github/workflows/ci-frontend.yml` sempre que um PR altera `frontend/`, `backend/`, `docker-compose.yml` ou o `Makefile`.

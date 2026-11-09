@@ -1,23 +1,25 @@
-from pydantic import BaseModel, ConfigDict
+from typing import Annotated
+
+from pydantic import BaseModel, ConfigDict, StringConstraints
+
+ItemName = Annotated[
+    str, StringConstraints(strip_whitespace=True, min_length=1, max_length=100)
+]
 
 
-class ItemBase(BaseModel):
-    name: str
+class ItemCreate(BaseModel):
+    name: ItemName
     description: str | None = None
-    price: float
-
-
-class ItemCreate(ItemBase):
-    pass
 
 
 class ItemUpdate(BaseModel):
-    name: str | None = None
+    name: ItemName | None = None
     description: str | None = None
-    price: float | None = None
 
 
-class Item(ItemBase):
+class ItemRead(BaseModel):
     id: int
+    name: str
+    description: str | None = None
 
     model_config = ConfigDict(from_attributes=True)
