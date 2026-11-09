@@ -18,6 +18,9 @@ class ItemRepository:
     def get_by_id(self, item_id: int) -> ItemModel | None:
         return self.db.get(ItemModel, item_id)
 
+    def get_by_name(self, name: str) -> ItemModel | None:
+        return self.db.scalar(select(ItemModel).where(ItemModel.name == name))
+
     def list(self) -> list[ItemModel]:
         return list(self.db.scalars(select(ItemModel).order_by(ItemModel.id)))
 
