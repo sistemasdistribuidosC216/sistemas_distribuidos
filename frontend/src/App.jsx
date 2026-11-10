@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ReservationsPage } from "./pages/ReservationsPage";
 import { RoomsPage } from "./pages/RoomsPage";
 
 const TABS = {
@@ -36,11 +37,7 @@ export default function App() {
         </div>
       </header>
       <main className="mx-auto max-w-5xl px-4 py-6">
-        {tab === "rooms" ? (
-          <RoomsPage />
-        ) : (
-          <p className="text-slate-600">Em construção.</p>
-        )}
+        {tab === "rooms" ? <RoomsPage /> : <ReservationsPage />}
       </main>
     </div>
   );
