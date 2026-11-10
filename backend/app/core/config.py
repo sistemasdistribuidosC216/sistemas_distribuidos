@@ -5,6 +5,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
     database_url: str = "postgresql+psycopg://reservas:reservas@localhost:5432/reservas"
+    timezone: str = "America/Sao_Paulo"
 
 
 settings = Settings()

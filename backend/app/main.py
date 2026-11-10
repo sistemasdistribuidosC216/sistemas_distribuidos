@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
-from app.api import rooms
+from app.api import reservations, rooms
 from app.core.errors import DomainError
 
 app = FastAPI(title="Reserva de Salas e Laboratórios")
@@ -15,6 +15,7 @@ def handle_domain_error(request: Request, error: DomainError):
 
 
 app.include_router(rooms.router)
+app.include_router(reservations.router)
 
 
 @app.get("/health")
