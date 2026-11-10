@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { request } from "../../src/services/api";
+import { API_URL, request } from "../../src/services/api";
 import { jsonResponse, mockFetch } from "../helpers";
 
 describe("request", () => {
@@ -11,7 +11,7 @@ describe("request", () => {
     ).resolves.toEqual({ id: 1 });
 
     const [url, options] = fetchMock.mock.calls[0];
-    expect(url).toBe("http://localhost:8000/rooms/");
+    expect(url).toBe(`${API_URL}/rooms/`);
     expect(options.headers).toEqual({ "Content-Type": "application/json" });
     expect(JSON.parse(options.body)).toEqual({ name: "Lab" });
   });
