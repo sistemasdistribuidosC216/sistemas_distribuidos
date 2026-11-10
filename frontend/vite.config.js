@@ -8,4 +8,12 @@ export default defineConfig({
     host: true,
     allowedHosts: [".app.github.dev"],
   },
+  test: {
+    environment: "jsdom",
+    setupFiles: ["./tests/setup.js"],
+    include: [
+      "tests/unit/**/*.test.{js,jsx}",
+      "tests/integration/**/*.test.{js,jsx}",
+    ],
+  },
 });
