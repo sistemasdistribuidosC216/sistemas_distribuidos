@@ -1,10 +1,20 @@
 from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.api import reservations, rooms
+from app.core.config import settings
 from app.core.errors import DomainError
 
 app = FastAPI(title="Reserva de Salas e Laboratórios")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.cors_origins_list,
+    allow_credentials=False,
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
+    allow_headers=["Content-Type"],
+)
 
 
 @app.exception_handler(DomainError)

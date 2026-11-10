@@ -14,6 +14,8 @@ test-results/
 
 # Ambiente (segredos reais nunca vão para o Git)
 .env
+.env.*
+!.env.example
 
 # Editor e sistema
 .vscode/
