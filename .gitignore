@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+
+# Node
+node_modules/
+dist/
+coverage/
+playwright-report/
+test-results/
+
+# Ambiente (segredos reais nunca vão para o Git)
+.env
+
+# Editor e sistema
+.vscode/
+.idea/
+.DS_Store
+*.log
