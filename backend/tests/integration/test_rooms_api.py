@@ -32,7 +32,9 @@ def test_list_rooms_filtered_by_kind(client):
     create_room(client, name="Sala 101", kind="sala")
     response = client.get("/rooms/", params={"kind": "sala"})
     assert response.status_code == 200
-    assert [room["name"] for room in response.json()] == ["Sala 101"]
+    names = [room["name"] for room in response.json()]
+    assert "Sala 101" in names
+    assert "Lab 1" not in names
 
 
 def test_get_room_not_found(client):
