@@ -2,6 +2,8 @@
 
 Projeto Final da disciplina **C216 — Sistemas Distribuídos**
 
+**Vídeo de demonstração:** https://youtu.be/oRDS82zex18
+
 
 ## Objetivo
 
@@ -31,7 +33,7 @@ Esta aplicação web centraliza o cadastro de salas e laboratórios e o agendame
 | Regra | Onde é garantida | Resposta da API |
 | --- | --- | --- |
 | Nome de sala único | Service + restrição `UNIQUE` no banco | `409 Conflict` |
-| Capacidade entre 1 e 500 | Schema (Pydantic) + `CHECK` no banco | `422` |
+| Capacidade entre 1 e 500 | Schema (1 a 500) + `CHECK` no banco (maior que zero) | `422` |
 | Sala com reservas não pode ser excluída | Service + `ON DELETE RESTRICT` | `409 Conflict` |
 | Término depois do início | Schema + `CHECK` no banco | `422` |
 | Reserva não pode começar no passado | Service | `422` |
@@ -125,7 +127,7 @@ A documentação interativa fica em `http://localhost:8000/docs` (Swagger).
 ## Pré-requisitos
 
 - Docker e Docker Compose
-- Make
+- Make (opcional no Windows; veja "Sem Make")
 - Para rodar testes e lint fora dos contêineres: Python 3.12 com Poetry e Node.js 22
 
 ## Variáveis de ambiente
@@ -159,6 +161,15 @@ make ps            # os três serviços devem aparecer como healthy
 - API (Swagger): http://localhost:8000/docs
 
 As migrations são aplicadas automaticamente quando a API sobe. Para parar: `make down` (os dados são mantidos no volume `pgdata`).
+
+### Sem Make (Windows)
+
+```bash
+docker compose up -d --build --wait   # equivale a make up-build
+docker compose ps                     # equivale a make ps
+docker compose exec api alembic current
+docker compose down                   # equivale a make down
+```
 
 ### No GitHub Codespaces
 
@@ -223,7 +234,6 @@ Os workflows em `.github/workflows/` rodam a cada push e pull request:
 - **CI - Backend:** Ruff, Black, migrations e Pytest com um PostgreSQL de serviço;
 - **CI - Frontend:** Biome, Vitest, build e E2E com a stack completa via Docker Compose.
 
-**Vídeo de demonstração:**
 
 ## Autoria
 
